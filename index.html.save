@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicrobioBeyond</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #0a0e17; 
+            color: #f9fafb; 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+        }
+        .header { 
+            background: #111827; 
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; color: #06b6d4; }
+        .btn { 
+            background: #06b6d4; 
+            color: #000; 
+            padding: 0.6rem 1.2rem; 
+            border-radius: 20px; 
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        .sort-bar { 
+            display: flex; 
+            gap: 1rem; 
+            margin-bottom: 1.5rem;
+            padding: 0.75rem;
+            background: #111827;
+            border-radius: 8px;
+        }
+        .sort-btn { 
+            background: transparent; 
+            border: none; 
+            color: #9ca3af; 
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        .sort-btn.active { background: #1f2937; color: #06b6d4; }
+        .post { 
+            background: #1f2937; 
+            padding: 1.5rem; 
+            margin-bottom: 1rem; 
+            border-radius: 12px;
+            display: flex;
+            gap: 1rem;
+        }
+        .vote { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+            min-width: 40px;
+        }
+        .vote button { 
+            background: none; 
+            border: none; 
+            color: #9ca3af; 
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .vote button:hover { color: #06b6d4; }
+        .vote-count { font-weight: 700; font-size: 0.9rem; }
+        .post-content { flex: 1; }
+        .post-meta { 
+            font-size: 0.85rem; 
+            color: #9ca3af; 
+            margin-bottom: 0.5rem;
+        }
+        .post-title { 
+            font-size: 1.2rem; 
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        .post-title:hover { color: #06b6d4; }
+        .post-preview { color: #d1d5db; font-size: 0.95rem; }
+        .tag { 
+            display: inline-block;
+            background: rgba(6,182,212,0.1);
+            color: #06b6d4;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+        .owner-badge {
+            background: linear-gradient(135deg, #f59e0b, #ec4899);
+            color: white;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: #1f2937;
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 90%;
+        }
+        .modal h2 { margin-bottom: 1rem; color: #06b6d4; }
+        .modal input {
+            width: 100%;
+            background: #111827;
+            border: 1px solid #374151;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .suggestion {
+            background: #374151;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+        .suggestion:hover { background: #06b6d4; color: #000; }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">🧬 MicrobioBeyond</div>
+        <button class="btn" onclick="openModal()">+ Create Post</button>
+    </header>
+
+    <div class="container">
+        <div class="sort-bar">
+            <button class="sort-btn active">🔥 Hot</button>
+            <button class="sort-btn">✨ New</button>
+            <button class="sort-btn">📈 Top</button>
+        </div>
+
+        <div class="post">
+            <div class="vote">
+                <button onclick="upvote(this)">▲</button>
+                <span class="vote-count">2,847</span>
+                <button>▼</button>
+            </div>
+            <div class="post-content">
+                <div class="post-meta">
+                    🧫 r/Bacteriology • Posted by MicrobioBeyond007<span class="owner-badge">OWNER</span> • 5h ago<span class="tag">Protocol</span>
+                </div>
+                <div class="post-title">Modified Gram Staining Protocol - Community v3.0</div>
+                <div class="post-preview">After 6 months of community feedback, we've refined the iodine fixation timing...</div>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="vote">
+                <button>▲</button>
+                <span class="vote-count">1,523</span>
+                <button>▼</button>
+            </div>
+            <div class="post-content">
+                <div class="post-meta">
+                    ⚗️ r/LabLife • Posted by LabWhisperer • 2h ago<span class="tag">Image</span>
+                </div>
+                <div class="post-title">When you finally get that pure culture after 3 weeks 🎉</div>
+                <div class="post-preview">Clinical isolate from CSF. Turned out to be a super rare Nocardia species...</div>
+            </div>
+        </div>
+
+        <div class="post">
+            <div class="vote">
+                <button>▲</button>
+                <span class="vote-count">892</span>
+                <button>▼</button>
+            </div>
+            <div class="post-content">
+                <div class="post-meta">
+                    📋 r/ProtocolShare • Posted by StainMaster • 1h ago<span class="tag">Question</span>
+                </div>
+                <div class="post-title">ID help: What am I looking at? Found in soil sample</div>
+                <div class="post-preview">400x magnification, Gram variable, catalase positive. Thoughts?</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2>🎭 Create Anonymous Lab ID</h2>
+            <p style="color: #9ca3af; margin-bottom: 1rem;">Join thousands of lab professionals anonymously</p>
+            
+            <input type="text" id="username" placeholder="Choose username (e.g., StainMaster99)">
+            
+            <p style="font-size: 0.85rem; color: #9ca3af; margin-bottom: 0.5rem;">Suggestions:</p>
+            <div class="suggestions">
+                <span class="suggestion" onclick="setUsername('CrystalViolet_42')">CrystalViolet_42</span>
+                <span class="suggestion" onclick="setUsername('AgarHero')">AgarHero</span>
+                <span class="suggestion" onclick="setUsername('LabRats_Unite')">LabRats_Unite</span>
+                <span class="suggestion" onclick="setUsername('PCRWhisperer')">PCRWhisperer</span>
+            </div>
+            
+            <button class="btn" onclick="createAccount()" style="width: 100%;">Start Contributing</button>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById('loginModal').classList.add('active');
+        }
+        
+        function setUsername(name) {
+            document.getElementById('username').value = name;
+        }
+        
+        function createAccount() {
+            const name = document.getElementById('username').value || 'AnonymousLabRat';
+            alert('Welcome ' + name + '! You can now post and comment.');
+            document.getElementById('loginModal').classList.remove('active');
+        }
+        
+        function upvote(btn) {
+            btn.style.color = '#ff4500';
+            const count = btn.nextElementSibling;
+            count.textContent = parseInt(count.textContent) + 1;
+            count.style.color = '#ff4500';
+        }
+        
+        // Close modal on outside click
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
