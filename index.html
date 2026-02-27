@@ -245,16 +245,33 @@
         </div>
     </div>
 
-    <script>
-        function openModal() {
-            document.getElementById('loginModal').classList.add('active');
-        }
-        
-        function setUsername(name) {
-            document.getElementById('username').value = name;
-        }
-        
-        <script>
+    <script type="module">
+  // ---------------------------
+  // Firebase imports
+  // ---------------------------
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+  import { getFirestore, collection, addDoc, query, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+  // ---------------------------
+  // Firebase config
+  // ---------------------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyBcHZEWyTG7DwU4aPjwCji3zox0Gu49jCQ",
+    authDomain: "microbiobeyond.firebaseapp.com",
+    projectId: "microbiobeyond",
+    storageBucket: "microbiobeyond.firebasestorage.app",
+    messagingSenderId: "928932188326",
+    appId: "1:928932188326:web:7fc076576a385f82942467"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ---------------------------
+  // Modal & username input
+  // ---------------------------
   const loginModal = document.getElementById('loginModal');
   const usernameInput = document.getElementById('username');
 
@@ -266,21 +283,21 @@
     usernameInput.value = name;
   }
 
+  // ---------------------------
   // Firebase login
+  // ---------------------------
   function createAccount() {
-    const email = usernameInput.value + "@microbiobeyond.com"; // temporary email for demo
-    const password = "Password123!"; // simple demo password
+    const email = usernameInput.value + "@microbiobeyond.com"; // demo email
+    const password = "Password123!"; // demo password
 
-    auth.createUserWithEmailAndPassword(email, password)
+    createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        const user = userCredential.user;
         alert('Welcome ' + usernameInput.value + '! You are now logged in.');
         loginModal.classList.remove('active');
       })
       .catch((error) => {
         if (error.code === "auth/email-already-in-use") {
-          // login instead
-          auth.signInWithEmailAndPassword(email, password)
+          signInWithEmailAndPassword(auth, email, password)
             .then(() => {
               alert('Welcome back ' + usernameInput.value + '!');
               loginModal.classList.remove('active');
@@ -295,22 +312,70 @@
   loginModal.addEventListener('click', function(e) {
     if (e.target === this) loginModal.classList.remove('active');
   });
-</script>
-        }
-        
-        function upvote(btn) {
-            btn.style.color = '#ff4500';
-            const count = btn.nextElementSibling;
-            count.textContent = parseInt(count.textContent) + 1;
-            count.style.color = '#ff4500';
-        }
-        
-        // Close modal on outside click
-        document.getElementById('loginModal').addEventListener('click', function(e) {
-            if (e.target === this) this.classList.remove('active');
-        });
-    </script>
-</body>
+
+  // ---------------------------
+  // Voting
+  // ---------------------------
+  function upvote(btn) {
+    btn.style.color = '#ff4500';
+    const count = btn.nextElementSibling;
+    count.textContent = parseInt(count.textContent) + 1;
+    count.style.color = '#ff4500';
+  }
+
+  // ---------------------------
+  // Firestore posts (future)
+  // ---------------------------
+  async function createPost(title, content, tag) {
+    const user = auth.currentUser;
+    if (!user) { 
+      alert("Please login first!"); 
+      return; 
+    }
+
+    await addDoc(collection(db, "posts"), {
+      title,
+      content,
+      tag,
+      username: usernameInput.value || "Anonymous",
+      createdAt: serverTimestamp()
+    });
+
+    alert("Post created successfully!");
+    loginModal.classList.remove('active');
+    loadPosts();
+  }
+
+  async function loadPosts() {
+    const container = document.querySelector(".container");
+    container.innerHTML = ""; // clear old posts
+
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const postDiv = document.createElement("div");
+      postDiv.classList.add("post");
+      postDiv.innerHTML = `
+        <div class="vote">
+          <button onclick="upvote(this)">▲</button>
+          <span class="vote-count">0</span>
+          <button>▼</button>
+        </div>
+        <div class="post-content">
+          <div class="post-meta">Posted by ${data.username} • ${data.tag || ""}</div>
+          <div class="post-title">${data.title}</div>
+          <div class="post-preview">${data.content}</div>
+        </div>
+      `;
+      container.appendChild(postDiv);
+    });
+  }
+
+  window.onload = loadPosts;
+</script></body>
 </html>
+
 
 
